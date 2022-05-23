@@ -13,7 +13,7 @@ class UIHandler():
         self.vim.command('nmap <buffer> q :call SpotifyClose()<CR>')
         self.vim.command('nmap <buffer> f :call SpotifySearch()<CR>')
         self.vim.command('nmap <buffer> <Enter> :call SpotifyOpenResult({}, {})<CR>'.format(results_buffer.number, results_buffer.number))
-        self.vim.command('vmap <buffer> <Enter> :call SpotifyPlayMultiple({}, {})<CR>'.format(results_buffer.number, results_buffer.number))
+        self.vim.command('vmap <buffer> <Enter> :<c-u> call SpotifyQueueMultiple({}, {})<CR>'.format(results_buffer.number, results_buffer.number))
 
         # setting up playlist buffer with bindings
         self.vim.command('topleft vertical 32 new')
@@ -23,6 +23,7 @@ class UIHandler():
         self.vim.command('nmap <buffer> q :call SpotifyClose()<CR>')
         self.vim.command('nmap <buffer> f :call SpotifySearch()<CR>')
         self.vim.command('nmap <buffer> <Enter> :call SpotifyOpenResult({}, {})<CR>'.format(playlist_buffer.number, results_buffer.number))
+        self.vim.command('set nonumber')
 
         return self.buffers
 

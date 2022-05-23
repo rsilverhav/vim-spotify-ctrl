@@ -50,15 +50,16 @@ class SpotifyControl(object):
                 self.vim.command('set switchbuf=useopen')
                 self.vim.command('sb {}'.format(target_buf))
 
-    @pynvim.function('SpotifyPlayMultiple')
-    def function_play_multiple(self, args):
+    @pynvim.function('SpotifyQueueMultiple')
+    def function_queue_multiple(self, args):
         source_buf = args[0]
         target_buf = args[1]
         self.vim.out_write('calling func\n')
-        [line_start, col_start] = self.vim.eval('getpos("\'<")[1:2]')
-        [line_end, col_end] = self.vim.eval('getpos("\'>")[1:2]')
+        [line_start] = self.vim.eval('getpos("\'<")[1:1]')
+        [line_end] = self.vim.eval('getpos("\'>")[1:1]')
         rows = self._get_buffer_by_number(source_buf).get_data_rows(line_start, line_end)
         self.vim.out_write(json.dumps(rows) + '\n')
+        self.spotify.queue_songs(rows)
 
 
     @pynvim.function('SpotifyClose')

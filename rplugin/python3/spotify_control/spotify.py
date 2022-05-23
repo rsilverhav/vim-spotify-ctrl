@@ -111,6 +111,11 @@ class Spotify():
         search_results.extend(self._parse_albums_data(search_results_data['albums']['items'], '  '))
         return search_results
 
+    def queue_songs(self, songs_data):
+        for song_data in songs_data:
+            url_queue = 'https://api.spotify.com/v1/me/player/queue?uri={}'.format(song_data["uri"])
+            self.make_spotify_request(url_queue, "POST", {})
+
     def _parse_tracks_data(self, tracks_data, prefix = '', context = None):
         tracks = []
         for data in tracks_data:
