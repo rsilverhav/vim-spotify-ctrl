@@ -17,17 +17,6 @@ class Spotify():
         encode = base64.b64encode(encode_str.encode())
         return "Basic " + encode.decode()
 
-    def codeToToken(self):
-        authorization = self.get_auth_string()
-
-        resp = requests.post( url="https://accounts.spotify.com/api/token",
-                headers={"Authorization": authorization},
-                data={"grant_type": "authorization_code",
-                    "code": CODE,
-                    "redirect_uri": self.vim.eval("g:spotify_redirect_url")})
-        print(resp)
-        print(resp.content)
-
     def get_tokens(self):
         f = open(TOKENS_FILE, "r")
         tokens = json.loads(f.read())
@@ -35,7 +24,6 @@ class Spotify():
         return tokens
 
     def refresh_token(self):
-        tokens = self.get_tokens()
         resp = requests.post(url="https://accounts.spotify.com/api/token",
                 data={"grant_type": "refresh_token", "refresh_token": self.vim.eval("g:spotify_refresh_token")},
                 headers={"Authorization": self.get_auth_string()})
@@ -66,17 +54,14 @@ class Spotify():
 
 
     def get_my_info(self):
-        tokens = self.get_tokens()
         resp = self.make_spotify_request("https://api.spotify.com/v1/me", "GET", {})
         print(resp)
 
     def get_playlists_data(self):
-        tokens = self.get_tokens()
         resp = self.make_spotify_request("https://api.spotify.com/v1/me/playlists", "GET", {})
         return resp["items"]
 
     def get_playlists_tracks_data(self, playlist_id):
-        tokens = self.get_tokens()
         url = "https://api.spotify.com/v1/playlists/{}/tracks".format(playlist_id)
         tracks_data = []
         while url != None:
