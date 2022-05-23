@@ -28,8 +28,6 @@ class Spotify():
                 data={"grant_type": "refresh_token", "refresh_token": self.vim.eval("g:spotify_refresh_token")},
                 headers={"Authorization": self.get_auth_string()})
         new_tokens_string = resp.content.decode("utf-8")
-        print(resp)
-        print(new_tokens_string)
         f = open(TOKENS_FILE, "w")
         f.write(new_tokens_string)
         f.close()
