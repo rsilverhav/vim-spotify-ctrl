@@ -27,7 +27,10 @@ class SpotifyControl(object):
     @pynvim.command('SpotifyInit', range='', nargs='*', sync=True)
     def spotify_init(self, args, range):
         self.buffers = []
-        self.spotify = Spotify(self.vim)
+        spotify_client_id = self.vim.eval("g:spotify_client_id")
+        spotify_client_secret = self.vim.eval("g:spotify_client_secret")
+        spotify_refresh_token = self.vim.eval("g:spotify_refresh_token")
+        self.spotify = Spotify(spotify_client_id, spotify_client_secret, spotify_refresh_token)
         self.ui_handler = UIHandler(self.vim)
         playlists_data = self.spotify.get_playlists_data()
         playlists = list(map(lambda playlist_data: { "title": playlist_data['name'], "uri": playlist_data['uri'] }, playlists_data))

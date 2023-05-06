@@ -8,12 +8,13 @@ home = expanduser("~")
 TOKENS_FILE = home + "/.tokens.json"
 
 class Spotify():
-    def __init__(self, vim):
-        self.vim = vim
+    def __init__(self, client_id, client_secret, existing_refresh_token):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.spotify_refresh_token = existing_refresh_token
 
     def get_auth_string(self):
-        encode_str = self.vim.eval("g:spotify_client_id") + ":" + self.vim.eval("g:spotify_client_secret")
-        print("encode_str = " + encode_str)
+        encode_str = self.client_id + ":" + self.client_secret
         encode = base64.b64encode(encode_str.encode())
         return "Basic " + encode.decode()
 
@@ -25,7 +26,7 @@ class Spotify():
 
     def refresh_token(self):
         resp = requests.post(url="https://accounts.spotify.com/api/token",
-                data={"grant_type": "refresh_token", "refresh_token": self.vim.eval("g:spotify_refresh_token")},
+                data={"grant_type": "refresh_token", "refresh_token": self.spotify_refresh_token},
                 headers={"Authorization": self.get_auth_string()})
         new_tokens_string = resp.content.decode("utf-8")
         f = open(TOKENS_FILE, "w")
