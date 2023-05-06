@@ -56,14 +56,9 @@ class Spotify():
             self.refresh_token()
             return self.make_spotify_request(url, method, params, False)
 
-    def get_my_info(self):
-        resp = self.make_spotify_request(
-            "https://api.spotify.com/v1/me", "GET", {})
-        print(resp)
-
-    def get_playlists_data(self):
+    def make_all_pagination_request(self, url: str):
         all_items = []
-        next_url = "https://api.spotify.com/v1/me/playlists"
+        next_url = url
         while (next_url):
             resp = self.make_spotify_request(
                 next_url, "GET", {})
@@ -72,15 +67,17 @@ class Spotify():
 
         return all_items
 
+    def get_my_info(self):
+        resp = self.make_spotify_request(
+            "https://api.spotify.com/v1/me", "GET", {})
+        print(resp)
+
+    def get_playlists_data(self):
+        return self.make_all_pagination_request("https://api.spotify.com/v1/me/playlists")
+
     def get_playlists_tracks_data(self, playlist_id):
-        url = "https://api.spotify.com/v1/playlists/{}/tracks".format(
-            playlist_id)
-        tracks_data = []
-        while url != None:
-            resp = self.make_spotify_request(url, "GET", {})
-            tracks_data.extend(resp["items"])
-            url = resp["next"]
-        return tracks_data
+        return self.make_all_pagination_request("https://api.spotify.com/v1/playlists/{}/tracks".format(
+            playlist_id))
 
     def play_track(self, track_id, context=None):
         track_uri = "spotify:track:{}".format(track_id)
