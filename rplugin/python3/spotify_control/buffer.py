@@ -1,5 +1,3 @@
-import json
-
 class Buffer():
     def __init__(self, name, vim_buffer):
         self.name = name

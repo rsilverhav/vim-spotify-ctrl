@@ -1,7 +1,7 @@
 import pynvim
-import json
 from spotify_control.spotify import Spotify
 from spotify_control.ui_handler import UIHandler
+
 
 @pynvim.plugin
 class SpotifyControl(object):
@@ -30,15 +30,16 @@ class SpotifyControl(object):
         spotify_client_id = self.vim.eval("g:spotify_client_id")
         spotify_client_secret = self.vim.eval("g:spotify_client_secret")
         spotify_refresh_token = self.vim.eval("g:spotify_refresh_token")
-        self.spotify = Spotify(spotify_client_id, spotify_client_secret, spotify_refresh_token)
+        self.spotify = Spotify(
+            spotify_client_id, spotify_client_secret, spotify_refresh_token)
         self.ui_handler = UIHandler(self.vim)
         playlists_data = self.spotify.get_playlists_data()
-        playlists = list(map(lambda playlist_data: { "title": playlist_data['name'], "uri": playlist_data['uri'] }, playlists_data))
+        playlists = list(map(lambda playlist_data: {
+                         "title": playlist_data['name'], "uri": playlist_data['uri']}, playlists_data))
         self.buffers = self.ui_handler.init_buffers(playlists)
 
     @pynvim.function('SpotifyOpenResult')
     def function_open_result(self, args):
-        self.vim.out_write('calling OpenResult\n')
         source_buf = args[0]
         target_buf = args[1]
         current_line = self.vim.eval('line(".")')
@@ -56,13 +57,11 @@ class SpotifyControl(object):
     @pynvim.function('SpotifyQueueMultiple')
     def function_queue_multiple(self, args):
         source_buf = args[0]
-        target_buf = args[1]
-        self.vim.out_write('calling func\n')
         [line_start] = self.vim.eval('getpos("\'<")[1:1]')
         [line_end] = self.vim.eval('getpos("\'>")[1:1]')
-        rows = self._get_buffer_by_number(source_buf).get_data_rows(line_start, line_end)
+        rows = self._get_buffer_by_number(
+            source_buf).get_data_rows(line_start, line_end)
         self.spotify.queue_songs(rows)
-
 
     @pynvim.function('SpotifyClose')
     def function_close(self, args):
