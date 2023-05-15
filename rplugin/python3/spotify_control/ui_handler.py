@@ -10,9 +10,6 @@ class UIHandler():
         self.spotify = spotify
         self.buffers = []
 
-    def testFunc(self, buffer: Buffer):
-        buffer.set_data([{"title": "WAT"}])
-
     def init_buffers(self):
         self.vim.command('tab new')
 

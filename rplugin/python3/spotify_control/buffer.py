@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Callable, Any
+from typing import Callable
 from spotify_control.spotify import Spotify
 
 
@@ -32,7 +34,7 @@ class Buffer(ABC):
     def format_line(self, data_item) -> str:
         return data_item["title"]
 
-    def handle_row_clicked(self, row_nr: int, get_buffer_by_name):
+    def handle_row_clicked(self, row_nr: int, get_buffer_by_name: Callable[[str], Buffer]):
         result_buffer = get_buffer_by_name('results')
         row = self.get_data_row(row_nr)
         if result_buffer and 'uri' in row:
