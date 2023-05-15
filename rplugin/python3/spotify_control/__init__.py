@@ -42,30 +42,13 @@ class SpotifyControl(object):
         self._get_buffer_by_number(buf_nr).handle_row_clicked(
             current_line, self._get_buffer_by_name)
 
-    @pynvim.function('SpotifyOpenResult')
-    def function_open_result(self, args):
-        source_buf = args[0]
-        target_buf = args[1]
-        current_line = self.vim.eval('line(".")')
-        row = self._get_buffer_by_number(source_buf).get_data_row(current_line)
-        if 'uri' in row:
-            context = None
-            if 'context' in row:
-                context = row['context']
-            new_data = self.spotify.make_request(row['uri'], context)
-            if new_data:
-                self._get_buffer_by_number(target_buf).set_data(new_data)
-                self.vim.command('set switchbuf=useopen')
-                self.vim.command('sb {}'.format(target_buf))
-
-    @pynvim.function('SpotifyQueueMultiple')
-    def function_queue_multiple(self, args):
+    @pynvim.function('SpotifyHandleRowsClicked')
+    def function_handle_rows_clicked(self, args):
         source_buf = args[0]
         [line_start] = self.vim.eval('getpos("\'<")[1:1]')
         [line_end] = self.vim.eval('getpos("\'>")[1:1]')
-        rows = self._get_buffer_by_number(
-            source_buf).get_data_rows(line_start, line_end)
-        self.spotify.queue_songs(rows)
+        self._get_buffer_by_number(
+            source_buf).handle_rows_clicked(line_start, line_end, self._get_buffer_by_name)
 
     @pynvim.function('SpotifyClose')
     def function_close(self, args):
@@ -78,4 +61,4 @@ class SpotifyControl(object):
         results_buffer = self._get_buffer_by_name('results')
         results_buffer.set_data(search_results)
         self.vim.command('set switchbuf=useopen')
-        self.vim.command('sb {}'.format(results_buffer.number))
+        self.vim.command(f'sb {results_buffer.number}')

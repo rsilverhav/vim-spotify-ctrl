@@ -18,22 +18,37 @@ class Buffer(ABC):
         self.vim_buffer.api.set_option('swapfile', False)
         self.vim_buffer.api.set_option('buflisted', False)
         self.vim_buffer.api.set_option('undolevels', -1)
-        vim.command('nmap <buffer> q :call SpotifyClose()<CR>')
-        vim.command('nmap <buffer> f :call SpotifySearch()<CR>')
+        vim.command('nmap <silent> <buffer> q :call SpotifyClose()<CR>')
+        vim.command('nmap <silent> <buffer> f :call SpotifySearch()<CR>')
 
         vim.command(
-            f"nmap <buffer> <Enter> :call SpotifyHandleRowClicked({self.number})<CR>")
+            f"nmap <silent> <buffer> <Enter> :call SpotifyHandleRowClicked({self.number})<CR>")
+
+        self.vim.command(
+            f"vmap <silent> <buffer> <Enter> :<c-u> call SpotifyHandleRowsClicked({self.number})<CR>")
+
         self.refresh_buffer_data()
 
-    @abstractmethod
     def format_line(self, data_item) -> str:
+        return data_item["title"]
+
+    def handle_row_clicked(self, row_nr: int, get_buffer_by_name):
+        result_buffer = get_buffer_by_name('results')
+        row = self.get_data_row(row_nr)
+        if result_buffer and 'uri' in row:
+            context = None
+            if 'context' in row:
+                context = row['context']
+            new_data = self.spotify.make_request(row['uri'], context)
+            if new_data:
+                result_buffer.set_data(new_data)
+                self.vim.command('set switchbuf=useopen')
+                self.vim.command(f'sb {result_buffer.number}')
+
+    def handle_rows_clicked(self, row_start: int, row_end: int, get_buffer_by_name):
         pass
 
-    @abstractmethod
-    def handle_row_clicked(self, row_nr: int, get_buffer_by_name: Callable[[str], Any]):
-        pass
-
-    @abstractmethod
+    @ abstractmethod
     def refresh_buffer_data(self):
         pass
 

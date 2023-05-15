@@ -15,14 +15,9 @@ class UIHandler():
 
     def init_buffers(self):
         self.vim.command('tab new')
-        # setting up results buffer with bindings
+
         results_buffer = ResultsBuffer(self.vim, self.spotify)
         self.buffers.append(results_buffer)
-
-        # # self.vim.command(
-        # #     f"nmap <buffer> <Enter> :call SpotifyOpenResult({results_buffer.number}, {results_buffer.number})<CR>")
-        # self.vim.command(
-        #    f"vmap <buffer> <Enter> :<c-u> call SpotifyQueueMultiple({results_buffer.number}, {results_buffer.number})<CR>")
 
         playlist_buffer = PlaylistsBuffer(self.vim, self.spotify)
         self.buffers.append(playlist_buffer)
