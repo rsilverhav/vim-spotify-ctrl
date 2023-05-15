@@ -32,11 +32,15 @@ class SpotifyControl(object):
         spotify_refresh_token = self.vim.eval("g:spotify_refresh_token")
         self.spotify = Spotify(
             spotify_client_id, spotify_client_secret, spotify_refresh_token)
-        self.ui_handler = UIHandler(self.vim)
-        playlists_data = self.spotify.get_playlists_data()
-        playlists = list(map(lambda playlist_data: {
-                         "title": playlist_data['name'], "uri": playlist_data['uri']}, playlists_data))
-        self.buffers = self.ui_handler.init_buffers(playlists)
+        self.ui_handler = UIHandler(self.vim, self.spotify)
+        self.buffers = self.ui_handler.init_buffers()
+
+    @pynvim.function('SpotifyHandleRowClicked')
+    def function_handle_row_clicked(self, args):
+        buf_nr = args[0]
+        current_line = self.vim.eval('line(".")')
+        self._get_buffer_by_number(buf_nr).handle_row_clicked(
+            current_line, self._get_buffer_by_name)
 
     @pynvim.function('SpotifyOpenResult')
     def function_open_result(self, args):

@@ -75,7 +75,10 @@ class Spotify():
             "/me", "GET", {})
 
     def get_playlists_data(self):
-        return self.make_all_pagination_request(self.get_url("/me/playlists"))
+        playlists_data = self.make_all_pagination_request(
+            self.get_url("/me/playlists"))
+        return list(map(lambda playlist_data: {
+            "title": playlist_data['name'], "uri": playlist_data['uri']}, playlists_data))
 
     def get_playlists_tracks_data(self, playlist_id):
         return self.make_all_pagination_request(self.get_url(f"/playlists/{playlist_id}/tracks"))
