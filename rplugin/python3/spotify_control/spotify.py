@@ -9,10 +9,11 @@ BASE_URL = "https://api.spotify.com/v1"
 
 
 class Spotify():
-    def __init__(self, client_id, client_secret, existing_refresh_token):
+    def __init__(self, client_id, client_secret, existing_refresh_token, print_debug=False):
         self.client_id = client_id
         self.client_secret = client_secret
         self.spotify_refresh_token = existing_refresh_token
+        self.print_debug = print_debug
 
     def get_url(self, path: str):
         return f"{BASE_URL}{path}"
@@ -38,18 +39,21 @@ class Spotify():
         f.write(new_tokens_string)
         f.close()
 
-    def make_spotify_request(self, url, method, params, retry_on_fail=True):
+    def _make_spotify_request(self, url, method, params, retry_on_fail=True):
         tokens = self.get_tokens()
         resp = None
+        if self.print_debug:
+            print(f"[{method}] {url}, params: {params}")
+
         if method == "POST":
             resp = requests.post(url=url, headers={
-                                 "Authorization": "Bearer " + tokens["access_token"]}, data=json.dumps(params), timeout=60)
+                                 "Authorization": "Bearer " + tokens["access_token"]}, data=params, timeout=60)
         elif method == "GET":
             resp = requests.get(url=url, headers={
                                 "Authorization": "Bearer " + tokens["access_token"]}, params=params, timeout=60)
         elif method == "PUT":
             resp = requests.put(url=url, headers={
-                                "Authorization": "Bearer " + tokens["access_token"], "Content-Type": "application/json"}, data=json.dumps(params), timeout=60)
+                                "Authorization": "Bearer " + tokens["access_token"], "Content-Type": "application/json"}, data=params, timeout=60)
         if resp.status_code == 200:
             content = json.loads(resp.content)
             return content
@@ -57,13 +61,13 @@ class Spotify():
             return True
         elif retry_on_fail:
             self.refresh_token()
-            return self.make_spotify_request(url, method, params, False)
+            return self._make_spotify_request(url, method, params, False)
 
     def make_all_pagination_request(self, url: str):
         all_items = []
         next_url = url
         while (next_url):
-            resp = self.make_spotify_request(
+            resp = self._make_spotify_request(
                 next_url, "GET", {})
             all_items += resp["items"]
             next_url = resp["next"]
@@ -71,7 +75,7 @@ class Spotify():
         return all_items
 
     def get_my_info(self):
-        return self.make_spotify_request(
+        return self._make_spotify_request(
             "/me", "GET", {})
 
     def get_playlists_data(self):
@@ -90,28 +94,28 @@ class Spotify():
             data = {"context_uri": context, "offset": {"uri": track_uri}}
         else:
             data = {"uris": [track_uri]}
-        resp = self.make_spotify_request(
+        resp = self._make_spotify_request(
             self.get_url("/me/player/play"), "PUT", json.dumps(data))
         return resp
 
     def search(self, query):
         data = {'q': query, 'type': 'album,artist,playlist,track'}
-        resp = self.make_spotify_request(
+        resp = self._make_spotify_request(
             self.get_url("/search?{}"), "GET", data)
         return resp
 
     def get_artist(self, id):
         url_top_tracks = self.get_url(f"/artists/{id}/top-tracks")
-        top_tracks_data = self.make_spotify_request(
+        top_tracks_data = self._make_spotify_request(
             url_top_tracks, "GET", {'country': 'SE'})
         url_albums = self.get_url(f"/artists/{id}/albums")
-        albums_data = self.make_spotify_request(
+        albums_data = self._make_spotify_request(
             url_albums, "GET", {'country': 'SE'})
         return {"top_tracks": top_tracks_data, "albums": albums_data}
 
     def get_album_tracks(self, id):
         url = self.get_url(f"/albums/{id}/tracks")
-        album_tracks = self.make_spotify_request(url, "GET", {'limit': 50})
+        album_tracks = self._make_spotify_request(url, "GET", {'limit': 50})
         return album_tracks['items']
 
     def get_artists_names(self, data):
@@ -136,11 +140,11 @@ class Spotify():
         for song_data in songs_data:
             url_queue = self.get_url(
                 f"/me/player/queue?uri={song_data['uri']}")
-            self.make_spotify_request(url_queue, "POST", {})
+            self._make_spotify_request(url_queue, "POST", {})
 
     def change_device(self, device_id):
-        self.make_spotify_request(self.get_url(
-            "/me/player"), method="PUT", params={'device_ids': [device_id], 'play': True})
+        self._make_spotify_request(self.get_url(
+            "/me/player"), method="PUT", params=json.dumps({'device_ids': [device_id], 'play': True}))
 
     def _parse_tracks_data(self, tracks_data, prefix='', context=None):
         tracks = []
@@ -192,6 +196,6 @@ class Spotify():
         return None
 
     def get_devices(self):
-        resp = self.make_spotify_request(
+        resp = self._make_spotify_request(
             url=self.get_url("/me/player/devices"), method="GET", params={})
         return list(map(lambda device: {"title": device["name"], "uri": f"spotify:device:{device['id']}", "is_active": device['is_active'], "volume_percent": device['volume_percent']}, resp["devices"]))

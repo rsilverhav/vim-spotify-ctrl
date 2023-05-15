@@ -1,6 +1,5 @@
 from spotify_control.buffer import Buffer
 from spotify_control.spotify import Spotify
-from typing import Callable
 
 
 class DevicesBuffer(Buffer):
@@ -15,7 +14,7 @@ class DevicesBuffer(Buffer):
         devices = self.spotify.get_devices()
         self.set_data(devices)
 
-    def handle_row_clicked(self, row_nr: int, get_buffer_by_name: Callable[[str], Buffer]):
+    def handle_row_clicked(self, row_nr: int, get_buffer_by_name):
         row = self.get_data_row(row_nr)
         if 'uri' in row:
             self.spotify.make_request(row["uri"])
