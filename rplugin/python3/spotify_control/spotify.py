@@ -43,13 +43,13 @@ class Spotify():
         resp = None
         if method == "POST":
             resp = requests.post(url=url, headers={
-                                 "Authorization": "Bearer " + tokens["access_token"]}, data=params, timeout=60)
+                                 "Authorization": "Bearer " + tokens["access_token"]}, data=json.dumps(params), timeout=60)
         elif method == "GET":
             resp = requests.get(url=url, headers={
                                 "Authorization": "Bearer " + tokens["access_token"]}, params=params, timeout=60)
         elif method == "PUT":
             resp = requests.put(url=url, headers={
-                                "Authorization": "Bearer " + tokens["access_token"], "Content-Type": "application/json"}, data=params, timeout=60)
+                                "Authorization": "Bearer " + tokens["access_token"], "Content-Type": "application/json"}, data=json.dumps(params), timeout=60)
         if resp.status_code == 200:
             content = json.loads(resp.content)
             return content
@@ -138,6 +138,10 @@ class Spotify():
                 f"/me/player/queue?uri={song_data['uri']}")
             self.make_spotify_request(url_queue, "POST", {})
 
+    def change_device(self, device_id):
+        self.make_spotify_request(self.get_url(
+            "/me/player"), method="PUT", params={'device_ids': [device_id], 'play': True})
+
     def _parse_tracks_data(self, tracks_data, prefix='', context=None):
         tracks = []
         for data in tracks_data:
@@ -182,9 +186,12 @@ class Spotify():
             album_tracks_data = self.get_album_tracks(id)
             album_tracks = self._parse_tracks_data(album_tracks_data, '', uri)
             return album_tracks
+        elif 'device' in uri:
+            self.change_device(id)
+            return None
         return None
 
     def get_devices(self):
-        devices = self.make_spotify_request(
+        resp = self.make_spotify_request(
             url=self.get_url("/me/player/devices"), method="GET", params={})
-        return devices
+        return list(map(lambda device: {"title": device["name"], "uri": f"spotify:device:{device['id']}", "is_active": device['is_active'], "volume_percent": device['volume_percent']}, resp["devices"]))
