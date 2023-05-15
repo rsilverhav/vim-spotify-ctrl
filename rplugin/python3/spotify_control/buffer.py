@@ -47,7 +47,7 @@ class Buffer(ABC):
                 self.vim.command('set switchbuf=useopen')
                 self.vim.command(f'sb {result_buffer.number}')
 
-    def handle_rows_clicked(self, row_start: int, row_end: int, get_buffer_by_name):
+    def handle_rows_clicked(self, line_start: int, line_end: int, get_buffer_by_name):
         pass
 
     @ abstractmethod
