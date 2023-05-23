@@ -62,6 +62,9 @@ class SpotifyControl(object):
     @pynvim.function('SpotifySearch')
     def function_search(self, args):
         search_query = self.ui_handler.query_input('Spotify search')
+        if len(search_query) == 0:
+            return
+
         search_results = self.spotify.get_search_results(search_query)
         results_buffer = self._get_buffer_by_name('results')
         results_buffer.set_data(search_results)
