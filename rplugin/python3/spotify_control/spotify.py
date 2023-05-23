@@ -39,7 +39,7 @@ class Spotify():
         f.write(new_tokens_string)
         f.close()
 
-    def _make_spotify_request(self, url, method, params, retry_on_fail=True):
+    def _make_spotify_request(self, url, method, params={}, retry_on_fail=True):
         tokens = self.get_tokens()
         resp = None
         if self.print_debug:
@@ -119,7 +119,7 @@ class Spotify():
         return album_tracks['items']
 
     def get_artists_names(self, data):
-        return ', '.join(list(map(lambda artist: artist['name'], data)))
+        return ', '.join([artist['name'] for artist in data])
 
     def get_search_results(self, search_query):
         search_results_data = self.search(search_query)
@@ -197,5 +197,16 @@ class Spotify():
 
     def get_devices(self):
         resp = self._make_spotify_request(
-            url=self.get_url("/me/player/devices"), method="GET", params={})
-        return list(map(lambda device: {"title": device["name"], "uri": f"spotify:device:{device['id']}", "is_active": device['is_active'], "volume_percent": device['volume_percent']}, resp["devices"]))
+            url=self.get_url("/me/player/devices"), method="GET")
+        return [{"title": device["name"], "uri": f"spotify:device:{device['id']}", "is_active": device['is_active'], "volume_percent": device['volume_percent']} for device in resp["devices"]]
+
+    def get_user_queue(self):
+        resp = self._make_spotify_request(
+            url=self.get_url("/me/player/queue"), method="GET")
+        return resp
+
+    def get_recently_played(self):
+        resp = self._make_spotify_request(url=self.get_url("/me/player/recently-played"), method="GET")
+        items = [i["track"] for i in resp["items"]]
+        items.reverse()
+        return items
