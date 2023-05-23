@@ -6,6 +6,7 @@ class QueueBuffer(Buffer):
     def __init__(self, vim, spotify: Spotify):
         super().__init__("queue", vim, spotify)
         vim.command('set nonumber')
+        vim.command('hi SpotifyPlayedSongs ctermfg=242')
 
     def refresh_buffer_data(self):
         respQueue = self.spotify.get_user_queue()
@@ -18,3 +19,4 @@ class QueueBuffer(Buffer):
         tracks = tracks + respQueue.queue
 
         self.set_data(tracks)
+        self.vim.command(f"match SpotifyPlayedSongs /\%<{len(respPrev) + 1}l/")
