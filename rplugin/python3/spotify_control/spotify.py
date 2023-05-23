@@ -2,11 +2,13 @@ import base64
 import json
 import requests
 from os.path import expanduser
+from collections import namedtuple
 
 home = expanduser("~")
 TOKENS_FILE = home + "/.tokens.json"
 BASE_URL = "https://api.spotify.com/v1"
 
+UserQueue = namedtuple("UserQueue", ["current", "queue"])
 
 class Spotify():
     def __init__(self, client_id, client_secret, existing_refresh_token, print_debug=False):
@@ -200,13 +202,19 @@ class Spotify():
             url=self.get_url("/me/player/devices"), method="GET")
         return [{"title": device["name"], "uri": f"spotify:device:{device['id']}", "is_active": device['is_active'], "volume_percent": device['volume_percent']} for device in resp["devices"]]
 
-    def get_user_queue(self):
+    def get_user_queue(self) -> UserQueue:
         resp = self._make_spotify_request(
             url=self.get_url("/me/player/queue"), method="GET")
-        return resp
+        currently_playing = resp["currently_playing"]
+        if currently_playing != None:
+            current = self._parse_tracks_data([currently_playing])[0]
+        else:
+            current = None
+        queue = self._parse_tracks_data([item for item in resp["queue"]])
+        return UserQueue(current, queue)
 
     def get_recently_played(self):
         resp = self._make_spotify_request(url=self.get_url("/me/player/recently-played"), method="GET")
-        items = [i["track"] for i in resp["items"]]
+        items = self._parse_tracks_data([i["track"] for i in resp["items"]])
         items.reverse()
         return items

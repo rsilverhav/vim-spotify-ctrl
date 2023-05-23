@@ -1,6 +1,7 @@
 from spotify_control.buffers.DevicesBuffer import DevicesBuffer
 from spotify_control.buffers.ResultsBuffer import ResultsBuffer
 from spotify_control.buffers.PlaylistsBuffer import PlaylistsBuffer
+from spotify_control.buffers.QueueBuffer import QueueBuffer
 from spotify_control.buffer import Buffer
 from spotify_control.spotify import Spotify
 
@@ -21,7 +22,11 @@ class UIHandler():
         devices_buffer = DevicesBuffer(self.vim, self.spotify)
         self.buffers.append(devices_buffer)
 
-        self.vim.command('topleft vertical 48 new')
+        self.vim.command('botright vertical 48 new')
+        queue_buffer = QueueBuffer(self.vim, self.spotify)
+        self.buffers.append(queue_buffer)
+
+        self.vim.command('topleft vertical 40 new')
         playlist_buffer = PlaylistsBuffer(self.vim, self.spotify)
         self.buffers.append(playlist_buffer)
 
