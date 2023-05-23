@@ -19,4 +19,6 @@ class QueueBuffer(Buffer):
         tracks = tracks + respQueue.queue
 
         self.set_data(tracks)
-        self.vim.command(f"match SpotifyPlayedSongs /\%<{len(respPrev) + 1}l/")
+        self.vim_buffer.clear_highlight(self.number)
+        for i in range(0, len(respPrev)):
+            self.vim_buffer.add_highlight("SpotifyPlayedSongs", i)

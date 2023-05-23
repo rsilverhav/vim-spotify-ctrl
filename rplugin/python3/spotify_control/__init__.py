@@ -50,6 +50,11 @@ class SpotifyControl(object):
         self._get_buffer_by_number(
             source_buf).handle_rows_clicked(line_start, line_end, self._get_buffer_by_name)
 
+    @pynvim.function('SpotifyRefreshBuffers')
+    def function_refresh_buffers(self, args):
+        for buffer in self.ui_handler.buffers:
+            buffer.refresh_buffer_data()
+
     @pynvim.function('SpotifyClose')
     def function_close(self, args):
         self.ui_handler.close()

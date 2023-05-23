@@ -22,6 +22,7 @@ class Buffer(ABC):
         self.vim_buffer.api.set_option('undolevels', -1)
         vim.command('nmap <silent> <buffer> q :call SpotifyClose()<CR>')
         vim.command('nmap <silent> <buffer> f :call SpotifySearch()<CR>')
+        vim.command('nmap <silent> <buffer> r :call SpotifyRefreshBuffers()<CR>')
 
         vim.command(
             f"nmap <silent> <buffer> <Enter> :call SpotifyHandleRowClicked({self.number})<CR>")
