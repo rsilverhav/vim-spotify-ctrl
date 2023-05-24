@@ -7,6 +7,7 @@ class QueueBuffer(Buffer):
         super().__init__("queue", vim, spotify)
         vim.command('set nonumber')
         vim.command('hi SpotifyPlayedSongs ctermfg=242')
+        vim.command('hi SpotifyCurrentlyPlaying cterm=bold guifg=#1DB954 ctermfg=35')
 
     def refresh_buffer_data(self):
         respQueue = self.spotify.get_user_queue()
@@ -22,3 +23,4 @@ class QueueBuffer(Buffer):
         self.vim_buffer.clear_highlight(self.number)
         for i in range(0, len(respPrev)):
             self.vim_buffer.add_highlight("SpotifyPlayedSongs", i)
+        self.vim_buffer.add_highlight("SpotifyCurrentlyPlaying", len(respPrev))
