@@ -20,6 +20,8 @@ class Buffer(ABC):
         self.vim_buffer.api.set_option('swapfile', False)
         self.vim_buffer.api.set_option('buflisted', False)
         self.vim_buffer.api.set_option('undolevels', -1)
+
+        vim.command(f"file {name}")
         vim.command('nmap <silent> <buffer> q :call SpotifyClose()<CR>')
         vim.command('nmap <silent> <buffer> f :call SpotifySearch()<CR>')
         vim.command('nmap <silent> <buffer> r :call SpotifyRefreshBuffers()<CR>')
