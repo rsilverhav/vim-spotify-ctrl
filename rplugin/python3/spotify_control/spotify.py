@@ -168,11 +168,7 @@ class Spotify():
         return tracks
 
     def _parse_albums_data(self, albums_data, prefix=''):
-        albums = []
-        for album in albums_data:
-            title = f"{prefix}{album['name']}  by {self.get_artists_names(album['artists'])}"
-            albums.append({'title': title, 'uri': album['uri']})
-        return albums
+        return [{'title': f"{prefix}{album['name']}  by {self.get_artists_names(album['artists'])}", 'uri': album['uri']} for album in albums_data]
 
     def _parse_playlists_result_data(self, playlists_data, prefix=''):
         return [{"title": f"{prefix}{playlist['name']}", "uri": playlist['uri']} for playlist in playlists_data]
