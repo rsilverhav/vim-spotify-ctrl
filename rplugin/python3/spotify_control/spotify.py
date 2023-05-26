@@ -126,16 +126,19 @@ class Spotify():
     def get_search_results(self, search_query):
         search_results_data = self.search(search_query)
         search_results = []
+        result_spacing = '  '
         search_results.append({'title': 'Tracks'})
         search_results.extend(self._parse_tracks_data(
-            search_results_data['tracks']['items'], '  '))
+            search_results_data['tracks']['items'], result_spacing))
         search_results.append({'title': 'Artists'})
         for artist in search_results_data['artists']['items']:
             search_results.append(
                 {'title': f"  {artist['name']}", 'uri': artist['uri']})
         search_results.append({'title': 'Albums'})
         search_results.extend(self._parse_albums_data(
-            search_results_data['albums']['items'], '  '))
+            search_results_data['albums']['items'], result_spacing))
+        search_results.append({'title': 'Playlists'})
+        search_results.extend(self._parse_playlists_result_data(search_results_data['playlists']['items'], result_spacing))
         return search_results
 
     def queue_songs(self, songs_data):
@@ -170,6 +173,9 @@ class Spotify():
             title = f"{prefix}{album['name']}  by {self.get_artists_names(album['artists'])}"
             albums.append({'title': title, 'uri': album['uri']})
         return albums
+
+    def _parse_playlists_result_data(self, playlists_data, prefix=''):
+        return [{"title": f"{prefix}{playlist['name']}", "uri": playlist['uri']} for playlist in playlists_data]
 
     def make_request(self, uri, context=None):
         id = uri.split(':')[-1]
