@@ -7,15 +7,16 @@ class QueueBuffer(Buffer):
         super().__init__("queue", vim, spotify)
         vim.command('set nonumber')
         vim.command('hi SpotifyPlayedSongs ctermfg=242')
-        vim.command('hi SpotifyCurrentlyPlaying cterm=bold guifg=#1DB954 ctermfg=35')
+        vim.command(
+            'hi SpotifyCurrentlyPlaying cterm=bold guifg=#1DB954 ctermfg=35')
 
     def refresh_buffer_data(self):
         respQueue = self.spotify.get_user_queue()
         respPrev = self.spotify.get_recently_played()
 
         tracks = respPrev
-        if respQueue.current != None:
-            respQueue.current["title"] = "> " + respQueue.current["title"]
+        if respQueue.current is not None:
+            respQueue.current.title = "> " + respQueue.current.title
             tracks = tracks + [respQueue.current]
         tracks = tracks + respQueue.queue
 

@@ -8,5 +8,5 @@ class PlaylistsBuffer(Buffer):
         vim.command('set nonumber')
 
     def refresh_buffer_data(self):
-        playlists = self.spotify.get_playlists_data()
+        playlists = self.spotify.get_playlists()
         self.set_data(playlists)

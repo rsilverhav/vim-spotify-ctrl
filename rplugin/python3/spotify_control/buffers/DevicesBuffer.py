@@ -17,5 +17,5 @@ class DevicesBuffer(Buffer):
     def handle_row_clicked(self, row_nr: int, get_buffer_by_name):
         row = self.get_data_row(row_nr)
         if 'uri' in row:
-            self.spotify.make_request(row["uri"])
+            self.spotify.make_uri_request(row["uri"])
             self.refresh_buffer_data()

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Callable
-from spotify_control.spotify import Spotify
+from typing import Callable, List
+from spotify_control.spotify import Spotify, ResponseRow
 
 
 class Buffer(ABC):
+    data: List[ResponseRow]
+
     def __init__(self, name, vim, spotify: Spotify):
         self.name = name
         self.vim_buffer = vim.current.buffer
@@ -24,7 +26,8 @@ class Buffer(ABC):
         vim.command(f"file {name}")
         vim.command('nmap <silent> <buffer> q :call SpotifyClose()<CR>')
         vim.command('nmap <silent> <buffer> f :call SpotifySearch()<CR>')
-        vim.command('nmap <silent> <buffer> r :call SpotifyRefreshBuffers()<CR>')
+        vim.command(
+            'nmap <silent> <buffer> r :call SpotifyRefreshBuffers()<CR>')
 
         vim.command(
             f"nmap <silent> <buffer> <Enter> :call SpotifyHandleRowClicked({self.number})<CR>")
@@ -34,17 +37,17 @@ class Buffer(ABC):
 
         self.refresh_buffer_data()
 
-    def format_line(self, data_item) -> str:
-        return data_item["title"]
+    def format_line(self, data_item: ResponseRow) -> str:
+        return data_item.title
 
     def handle_row_clicked(self, row_nr: int, get_buffer_by_name: Callable[[str], Buffer]):
         result_buffer = get_buffer_by_name('results')
         row = self.get_data_row(row_nr)
-        if result_buffer and 'uri' in row:
+        if result_buffer and row.uri != "":
             context = None
-            if 'context' in row:
-                context = row['context']
-            new_data = self.spotify.make_request(row['uri'], context)
+            if row.context is not None:
+                context = row.context
+            new_data = self.spotify.make_uri_request(row.uri, context)
             if new_data:
                 result_buffer.set_data(new_data)
                 self.vim.command('set switchbuf=useopen')
@@ -57,7 +60,7 @@ class Buffer(ABC):
     def refresh_buffer_data(self):
         pass
 
-    def set_data(self, data):
+    def set_data(self, data: List[ResponseRow]):
         self.data = list(data)
         lines = list(map(self.format_line, data))
         self.vim_buffer.api.set_option('modifiable', True)
@@ -68,7 +71,7 @@ class Buffer(ABC):
         self.vim_buffer.api.set_option('modifiable', False)
         self.vim_buffer.api.set_option('readonly', True)
 
-    def get_data_row(self, line_nr):
+    def get_data_row(self, line_nr: int) -> ResponseRow:
         index = line_nr - 1
         if index >= 0 and index < len(self.data):
             return self.data[index]
