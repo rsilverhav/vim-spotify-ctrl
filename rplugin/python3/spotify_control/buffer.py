@@ -32,6 +32,9 @@ class Buffer(ABC):
         vim.command(
             f"nmap <silent> <buffer> <Enter> :call SpotifyHandleRowClicked({self.number})<CR>")
 
+        vim.command(
+            f"nmap <silent> <buffer> gd :call SpotifyHandleRowClickedShift({self.number})<CR>")
+
         self.vim.command(
             f"vmap <silent> <buffer> <Enter> :<c-u> call SpotifyHandleRowsClicked({self.number})<CR>")
 
@@ -41,8 +44,8 @@ class Buffer(ABC):
         return data_item.title
 
     def handle_row_clicked(self, row_nr: int, get_buffer_by_name: Callable[[str], Buffer]):
-        result_buffer = get_buffer_by_name('results')
         row = self.get_data_row(row_nr)
+        result_buffer = get_buffer_by_name('results')
         if result_buffer and row.uri != "":
             context = None
             if row.context is not None:
@@ -52,6 +55,9 @@ class Buffer(ABC):
                 result_buffer.set_data(new_data)
                 self.vim.command('set switchbuf=useopen')
                 self.vim.command(f'sb {result_buffer.number}')
+
+    def handle_row_clicked_dropdown(self, row_nr: int, get_buffer_by_name: Callable[[str], Buffer]):
+        pass
 
     def handle_rows_clicked(self, line_start: int, line_end: int, get_buffer_by_name):
         pass

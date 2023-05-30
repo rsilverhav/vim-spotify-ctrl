@@ -50,10 +50,24 @@ class SpotifyControl(object):
         self._get_buffer_by_number(
             source_buf).handle_rows_clicked(line_start, line_end, self._get_buffer_by_name)
 
+    @pynvim.function('SpotifyHandleRowClickedShift')
+    def function_handle_row_clicked_shift(self, args):
+        buf_nr = args[0]
+        current_line = self.vim.eval('line(".")')
+        self._get_buffer_by_number(
+            buf_nr).handle_row_clicked_dropdown(current_line, self._get_buffer_by_name)
+
     @pynvim.function('SpotifyRefreshBuffers')
     def function_refresh_buffers(self, args):
         for buffer in self.ui_handler.buffers:
             buffer.refresh_buffer_data()
+
+    @pynvim.function('SpotifyOpenUri')
+    def function_open_uri(self, args):
+        target_buffer = args[0]
+        uri = args[1]
+        resp = self.spotify.make_uri_request(uri)
+        self._get_buffer_by_number(target_buffer).set_data(resp)
 
     @pynvim.function('SpotifyClose')
     def function_close(self, args):

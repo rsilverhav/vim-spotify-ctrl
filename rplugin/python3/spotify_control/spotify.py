@@ -175,7 +175,8 @@ class Spotify():
             artists = self._parse_artists(track_data['artists'])
             artist_names = ", ".join([art.title for art in artists])
             title = f"{track_data['name']} - {artist_names}"
-            parsed_track = ResponseRow(f"{prefix}{title}", track_data['uri'], artists=artists)
+            parsed_track = ResponseRow(
+                f"{prefix}{title}", track_data['uri'], artists=artists)
             if context:
                 parsed_track.context = context
             tracks.append(parsed_track)
@@ -269,10 +270,10 @@ class Spotify():
             self.play_track(uri_id, context)
         elif 'artist' in uri:
             artist_data = self._get_artist(uri_id)
-            artist = [{'title': 'Tracks'}]
+            artist = [ResponseRow('Tracks', '')]
             artist.extend(self._parse_tracks_data(
                 artist_data['top_tracks']['tracks'], '  '))
-            artist.append({'title': 'Albums'})
+            artist.append(ResponseRow('Albums', ''))
             artist.extend(self._parse_albums_data(
                 artist_data['albums']['items'], '  '))
             return artist
