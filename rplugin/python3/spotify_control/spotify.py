@@ -175,8 +175,12 @@ class Spotify():
             artists = self._parse_artists(track_data['artists'])
             artist_names = ", ".join([art.title for art in artists])
             title = f"{track_data['name']} - {artist_names}"
+            album = None
+            if 'album' in track_data:
+                albums = self._parse_albums_data([track_data['album']])
+                album = albums[0]
             parsed_track = ResponseRow(
-                f"{prefix}{title}", track_data['uri'], artists=artists)
+                f"{prefix}{title}", track_data['uri'], artists=artists, album=album)
             if context:
                 parsed_track.context = context
             tracks.append(parsed_track)
