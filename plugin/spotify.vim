@@ -4,7 +4,7 @@ if !&rtp =~ 'plugin-name'
   endif
 endif
 
-function! spotify#open_floating(items, original_buffer)
+function! spotify#open_floating(items, target_buffer)
   let buf = nvim_create_buf(v:false, v:true)
 
   let options = []
@@ -32,15 +32,17 @@ function! spotify#open_floating(items, original_buffer)
   call win_gotoid(win)
 
   let b:uris = uris
-  let b:original_buffer = a:original_buffer
+  let b:target_buffer = a:target_buffer
 
   return win
 endfunction
 
 function! spotify#choose_floating()
   let curr_line = line(".")
-  call SpotifyOpenUri(b:original_buffer, b:uris[curr_line - 1])
+  call SpotifyOpenUri(b:target_buffer, b:uris[curr_line - 1])
+  let target_buffer = b:target_buffer
   :q!
+  execute "sb " . target_buffer
 endfunction
 
 

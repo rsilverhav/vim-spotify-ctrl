@@ -57,7 +57,20 @@ class Buffer(ABC):
                 self.vim.command(f'sb {result_buffer.number}')
 
     def handle_row_clicked_dropdown(self, row_nr: int, get_buffer_by_name: Callable[[str], Buffer]):
-        pass
+        row = self.get_data_row(row_nr)
+        floating_options: List[str] = []
+        if row.artists is not None:
+            for artist in row.artists:
+                floating_options.append(
+                    f"Go to artist {artist.title}|{artist.uri}")
+        if row.album is not None:
+            formatted_title = row.album.title.replace("'", "")
+            floating_options.append(
+                f"Go to album {formatted_title}|{row.album.uri}")
+        formatted = ", ".join([f"'{opt}'" for opt in floating_options])
+        result_buffer = get_buffer_by_name("results")
+        self.vim.command(
+            f"call spotify#open_floating([{formatted}], {result_buffer.number})")
 
     def handle_rows_clicked(self, line_start: int, line_end: int, get_buffer_by_name):
         pass
