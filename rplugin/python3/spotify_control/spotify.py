@@ -249,10 +249,10 @@ class Spotify():
             search_results_data['playlists']['items'], result_spacing))
         return search_results
 
-    def queue_songs(self, songs_data):
+    def queue_songs(self, songs_data: List[ResponseRow]):
         for song_data in songs_data:
             url_queue = self._get_url(
-                f"/me/player/queue?uri={song_data['uri']}")
+                f"/me/player/queue?uri={song_data.uri}")
             self._make_spotify_request(url_queue, "POST", {})
 
     def change_device(self, device_id: str):
