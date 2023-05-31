@@ -6,7 +6,7 @@ endif
 
 function! spotify#open_floating(items, target_buffer)
   let buf = nvim_create_buf(v:false, v:true)
-
+  let g:spotify_popup_buffer = buf
   let options = []
   let uris = []
 
@@ -41,8 +41,8 @@ function! spotify#choose_floating()
   let curr_line = line(".")
   call SpotifyOpenUri(b:target_buffer, b:uris[curr_line - 1])
   let target_buffer = b:target_buffer
-  :q!
-  execute "sb " . target_buffer
+  call nvim_win_close(get(win_findbuf(g:spotify_popup_buffer), 0), 1)
+  call win_gotoid(get(win_findbuf(target_buffer), 0))
 endfunction
 
 
