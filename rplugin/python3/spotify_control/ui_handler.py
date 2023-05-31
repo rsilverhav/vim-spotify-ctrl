@@ -6,7 +6,7 @@ from spotify_control.buffer import Buffer
 from spotify_control.spotify import Spotify
 
 
-class UIHandler():
+class UIHandler:
     def __init__(self, vim, spotify: Spotify):
         self.vim = vim
         self.spotify = spotify

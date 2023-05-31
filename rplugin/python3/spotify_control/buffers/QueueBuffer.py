@@ -1,9 +1,10 @@
+from pynvim import Nvim
 from spotify_control.buffer import Buffer
 from spotify_control.spotify import Spotify
 
 
 class QueueBuffer(Buffer):
-    def __init__(self, vim, spotify: Spotify):
+    def __init__(self, vim: Nvim, spotify: Spotify):
         super().__init__("queue", vim, spotify)
         vim.command('set nonumber')
 

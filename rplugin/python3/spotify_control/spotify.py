@@ -3,7 +3,7 @@ import json
 import requests
 from os.path import expanduser
 from collections import namedtuple
-from typing import List
+from typing import Any, Dict, List
 
 home = expanduser("~")
 TOKENS_FILE = home + "/.tokens.json"
@@ -12,28 +12,6 @@ BASE_URL = "https://api.spotify.com/v1"
 UserQueue = namedtuple("UserQueue", ["current", "queue"])
 Player = namedtuple(
     "Player", ["context_title", "context_uri", "current_item_title"])
-
-
-# class Context():
-#     formatted_title: str
-#     uri: str
-#
-#     def __init__(self, formatted_title: str, uri: str):
-#         self.formatted_title = formatted_title
-#         self.uri = uri
-#
-#
-# class Artist():
-#     formatted_title: str
-#     uri: str
-#
-#     def __init__(self,
-#                  formatted_title: str,
-#                  uri: str
-#                  ):
-#
-#         self.formatted_title = formatted_title
-#         self.uri = uri
 
 
 class SpotifyNode:
@@ -49,57 +27,21 @@ class SpotifyNode:
         self.uri = uri
 
 
-class ResponseRow:
-    title: str
-    uri: str
+class ResponseRow(SpotifyNode):
     context: SpotifyNode | None
     artists: List[SpotifyNode] | None
     album: SpotifyNode | None
 
     def __init__(self, title: str, uri: str, context: SpotifyNode | None = None,
                  artists: List[SpotifyNode] | None = None, album: SpotifyNode | None = None):
-        self.title = title
-        self.uri = uri
+        super().__init__(title, uri)
         self.context = context
         self.artists = artists
+
         self.album = album
 
 
-# class Track():
-#     formatted_title: str
-#     artists: List[Artist]
-#     name: str
-#     uri: str
-#     context: str
-#
-#     def __init__(self,
-#                  artists: List[Artist],
-#                  name: str,
-#                  uri: str,
-#                  context: str | None = None):
-#         self.formatted_title = f"{name} - {artists}"
-#         self.artists = artists
-#         self.name = name
-#         self.uri = uri
-#         self.context = context
-#
-#
-# class Playlist():
-#     name: str
-#     uri: str
-#     tracks: List[Track]
-#
-#     def __init__(self,
-#                  name: str,
-#                  uri: str,
-#                  tracks: List[Track]
-#                  ):
-#         self.name = name
-#         self.uri = uri
-#         self.tracks = tracks
-
-
-class Spotify():
+class Spotify:
     def __init__(self, client_id, client_secret, existing_refresh_token, print_debug=False):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -130,7 +72,7 @@ class Spotify():
         f.write(new_tokens_string)
         f.close()
 
-    def _make_spotify_request(self, url, method, params={}, retry_on_fail=True):
+    def _make_spotify_request(self, url, method, params={}, retry_on_fail=True) -> Dict[str, Any] | None:
         tokens = self._get_tokens()
         resp = None
         if self.print_debug:
@@ -145,14 +87,17 @@ class Spotify():
         elif method == "PUT":
             resp = requests.put(url=url, headers={
                                 "Authorization": "Bearer " + tokens["access_token"], "Content-Type": "application/json"}, data=params, timeout=60)
+        else:
+            raise Exception(f"Unknown method {method}")
         if resp.status_code == 200:
             content = json.loads(resp.content)
             return content
         elif resp.status_code == 204:
-            return True
+            return {}
         elif retry_on_fail:
             self._refresh_token()
             return self._make_spotify_request(url, method, params, False)
+        return None
 
     def _make_all_pagination_request(self, url: str):
         all_items = []
@@ -160,8 +105,11 @@ class Spotify():
         while (next_url):
             resp = self._make_spotify_request(
                 next_url, "GET", {})
-            all_items += resp["items"]
-            next_url = resp["next"]
+            if resp is None:
+                return all_items
+            else:
+                all_items += resp["items"]
+                next_url = resp["next"]
 
         return all_items
 
@@ -223,30 +171,36 @@ class Spotify():
     def _get_album_tracks(self, track_id):
         url = self._get_url(f"/albums/{track_id}/tracks")
         album_tracks = self._make_spotify_request(url, "GET", {'limit': 50})
-        return album_tracks['items']
+        if album_tracks is not None:
+            return album_tracks['items']
+        else:
+            return []
 
-    def _parse_artists(self, data) -> List[ResponseRow]:
-        return [ResponseRow(artist['name'], artist['uri']) for artist in data]
+    def _parse_artists(self, data) -> List[SpotifyNode]:
+        return [SpotifyNode(artist['name'], artist['uri']) for artist in data]
 
     def get_search_results(self, search_query) -> List[ResponseRow]:
         data = {'q': search_query, 'type': 'album,artist,playlist,track'}
         search_results_data = self._make_spotify_request(
             self._get_url("/search?{}"), "GET", data)
         search_results: List[ResponseRow] = []
-        result_spacing = '  '
-        search_results.append(ResponseRow('Tracks', ''))
-        search_results.extend(self._parse_tracks_data(
-            search_results_data['tracks']['items'], result_spacing))
-        search_results.append(ResponseRow('Artists', ''))
-        for artist in search_results_data['artists']['items']:
-            search_results.append(
-                ResponseRow(f"  {artist['name']}", artist['uri']))
-        search_results.append(ResponseRow('Albums', ''))
-        search_results.extend(self._parse_albums_data(
-            search_results_data['albums']['items'], result_spacing))
-        search_results.append(ResponseRow('Playlists', ''))
-        search_results.extend(self._parse_playlists_result_data(
-            search_results_data['playlists']['items'], result_spacing))
+        if search_results_data is None:
+            search_results.append(ResponseRow('!!Search error!!', ''))
+        else:
+            result_spacing = '  '
+            search_results.append(ResponseRow('Tracks', ''))
+            search_results.extend(self._parse_tracks_data(
+                search_results_data['tracks']['items'], result_spacing))
+            search_results.append(ResponseRow('Artists', ''))
+            for artist in search_results_data['artists']['items']:
+                search_results.append(
+                    ResponseRow(f"  {artist['name']}", artist['uri']))
+            search_results.append(ResponseRow('Albums', ''))
+            search_results.extend(self._parse_albums_data(
+                search_results_data['albums']['items'], result_spacing))
+            search_results.append(ResponseRow('Playlists', ''))
+            search_results.extend(self._parse_playlists_result_data(
+                search_results_data['playlists']['items'], result_spacing))
         return search_results
 
     def queue_songs(self, songs_data: List[ResponseRow]):
@@ -274,12 +228,16 @@ class Spotify():
             self.play_track(uri_id, context)
         elif 'artist' in uri:
             artist_data = self._get_artist(uri_id)
-            artist = [ResponseRow('Tracks', '')]
-            artist.extend(self._parse_tracks_data(
-                artist_data['top_tracks']['tracks'], '  '))
-            artist.append(ResponseRow('Albums', ''))
-            artist.extend(self._parse_albums_data(
-                artist_data['albums']['items'], '  '))
+            artist: list[ResponseRow] = []
+            if artist_data is not None:
+                if artist_data['top_tracks'] is not None:
+                    artist.append(ResponseRow('Tracks', ''))
+                    artist.extend(self._parse_tracks_data(
+                        artist_data['top_tracks']['tracks'], '  '))
+                if artist_data['albums'] is not None:
+                    artist.append(ResponseRow('Albums', ''))
+                    artist.extend(self._parse_albums_data(
+                        artist_data['albums']['items'], '  '))
             return artist
         elif 'album' in uri:
             album_tracks_data = self._get_album_tracks(uri_id)
@@ -293,30 +251,52 @@ class Spotify():
     def get_devices(self):
         resp = self._make_spotify_request(
             url=self._get_url("/me/player/devices"), method="GET")
-        return [{"title": device["name"], "uri": f"spotify:device:{device['id']}", "is_active": device['is_active'], "volume_percent": device['volume_percent']} for device in resp["devices"]]
+        if resp is not None:
+
+            devices: List[ResponseRow] = []
+            for device in resp["devices"]:
+                pre = "> " if device["is_active"] else ""
+                devices.append(ResponseRow(
+                    f"{pre}{device['name']} [vol: {device['volume_percent']}%]", f"spotify:device:{device['id']}"))
+
+            return devices
+        else:
+            return []
 
     def get_user_queue(self) -> UserQueue:
         resp = self._make_spotify_request(
             url=self._get_url("/me/player/queue"), method="GET")
-        currently_playing = resp["currently_playing"]
-        if currently_playing is not None:
-            current = self._parse_tracks_data([currently_playing])[0]
+        if resp is not None:
+            currently_playing = resp["currently_playing"]
+            if currently_playing is not None:
+                current = self._parse_tracks_data([currently_playing])[0]
+            else:
+                current = None
+            queue = self._parse_tracks_data([item for item in resp["queue"]])
+            return UserQueue(current, queue)
         else:
-            current = None
-        queue = self._parse_tracks_data([item for item in resp["queue"]])
-        return UserQueue(current, queue)
+            return UserQueue({}, {})
 
     def get_recently_played(self):
         resp = self._make_spotify_request(url=self._get_url(
             "/me/player/recently-played"), method="GET")
-        items = self._parse_tracks_data([i["track"] for i in resp["items"]])
-        items.reverse()
-        return items
+        if resp is not None:
+            items = self._parse_tracks_data(
+                [i["track"] for i in resp["items"]])
+            items.reverse()
+            return items
+        else:
+            return []
 
     def get_player(self) -> Player:
         resp = self._make_spotify_request(
             url=self._get_url("/me/player"), method="GET")
         # context_info = self.make_uri_request(resp['context']['uri'])
-        player = Player(resp["context"]["uri"], resp["context"]["uri"],
-                        self._parse_tracks_data([resp['item']])[0]['title'])
-        return player
+
+        if resp is not None and resp['item'] is not None:
+            item = resp['item']
+            player = Player(resp["context"]["uri"], resp["context"]["uri"],
+                            self._parse_tracks_data([item])[0].title)
+            return player
+        else:
+            return Player('', '', '')
