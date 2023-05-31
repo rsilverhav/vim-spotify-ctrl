@@ -46,7 +46,11 @@ function! spotify#choose_floating()
 endfunction
 
 
-hi SpotifyGotoDropdown ctermbg=6 ctermfg=1
+" Highlights
+hi SpotifyGotoDropdown ctermfg=236 ctermbg=255 guifg=#818596 guibg=#17171b
+hi SpotifyCurrentlyPlaying cterm=bold guifg=#1DB954 ctermfg=35
+hi SpotifyPlayedSongs ctermfg=242
+
 autocmd BufLeave * if &ft == 'spotify_dropdown' | :q! | endif
 autocmd Filetype spotify_dropdown nnoremap <buffer> <Esc> :q!<CR>
 autocmd Filetype spotify_dropdown nnoremap <buffer> <Enter> :call spotify#choose_floating()<CR>

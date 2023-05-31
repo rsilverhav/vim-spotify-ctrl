@@ -6,9 +6,6 @@ class QueueBuffer(Buffer):
     def __init__(self, vim, spotify: Spotify):
         super().__init__("queue", vim, spotify)
         vim.command('set nonumber')
-        vim.command('hi SpotifyPlayedSongs ctermfg=242')
-        vim.command(
-            'hi SpotifyCurrentlyPlaying cterm=bold guifg=#1DB954 ctermfg=35')
 
     def refresh_buffer_data(self):
         respQueue = self.spotify.get_user_queue()
