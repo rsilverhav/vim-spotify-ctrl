@@ -25,6 +25,7 @@ class Buffer(ABC):
         self.vim_buffer.api.set_option('undolevels', -1)
 
         vim.command(f"file {name}")
+        vim.command("set nowrap")
         vim.command('nmap <silent> <buffer> q :call SpotifyClose()<CR>')
         vim.command('nmap <silent> <buffer> f :call SpotifySearch()<CR>')
         vim.command(
