@@ -2,6 +2,7 @@ import base64
 import json
 import requests
 import re
+import os.path
 from datetime import datetime
 from os.path import expanduser
 from collections import namedtuple
@@ -59,7 +60,10 @@ class Spotify:
         return "Basic " + encode.decode()
 
     def _get_tokens(self):
-        f = open(TOKENS_FILE, "w+", encoding="utf-8")
+        if not os.path.isfile(TOKENS_FILE):
+            return {"access_token": "", }
+
+        f = open(TOKENS_FILE, "r", encoding="utf-8")
         tokens = json.loads(f.read())
         f.close()
         return tokens
@@ -76,6 +80,7 @@ class Spotify:
 
     def _make_spotify_request(self, url, method, params={}, retry_on_fail=True) -> Dict[str, Any] | None:
         tokens = self._get_tokens()
+
         resp = None
         if self.print_debug:
             print(f"[{method}] {url}, params: {params}")
