@@ -32,7 +32,7 @@ class SpotifyControl(object):
             return 0
 
     @pynvim.command('SpotifyInit', range='', nargs=0, sync=True)
-    def spotify_init(self, args, range):
+    def spotify_init(self, args, range=None):
         self.buffers = []
         spotify_client_id = self.vim.eval("g:spotify_client_id")
         spotify_client_secret = self.vim.eval("g:spotify_client_secret")
