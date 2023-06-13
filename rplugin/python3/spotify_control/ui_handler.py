@@ -18,7 +18,7 @@ class UIHandler:
         results_buffer = ResultsBuffer(self.vim, self.spotify)
         self.buffers.append(results_buffer)
 
-        self.vim.command('botright horizontal 6 new')
+        self.vim.command('botright 6 new')
         devices_buffer = DevicesBuffer(self.vim, self.spotify)
         self.buffers.append(devices_buffer)
 
