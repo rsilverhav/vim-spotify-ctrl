@@ -1,6 +1,8 @@
 import base64
 import json
 import requests
+import re
+from datetime import datetime
 from os.path import expanduser
 from collections import namedtuple
 from typing import Any, Dict, List
@@ -137,7 +139,17 @@ class Spotify:
     def _get_artists_names(self, artists):
         return ", ".join([artist["name"] for artist in artists])
 
+    def _get_album_release_datetime(self, album_data):
+        date_fmt = "%Y-%m-%d"
+        pattern = re.compile("^\\d{4}$")
+        if pattern.match(album_data['release_date']):
+            date_fmt = "%Y"
+        return datetime.strptime(album_data['release_date'], date_fmt)
+
     def _parse_albums_data(self, albums_data, prefix='') -> List[ResponseRow]:
+        albums_data.sort(
+            key=lambda album_data: self._get_album_release_datetime(album_data), reverse=True)
+
         return [ResponseRow(f"{prefix}{album['name']}  by {self._get_artists_names(album['artists'])}", album['uri']) for album in albums_data]
 
     def _parse_playlists_result_data(self, playlists_data, prefix='') -> List[ResponseRow]:
@@ -163,9 +175,9 @@ class Spotify:
         url_top_tracks = self._get_url(f"/artists/{artist_id}/top-tracks")
         top_tracks_data = self._make_spotify_request(
             url_top_tracks, "GET", {'country': 'SE'})
-        url_albums = self._get_url(f"/artists/{artist_id}/albums")
-        albums_data = self._make_spotify_request(
-            url_albums, "GET", {'country': 'SE'})
+        url_albums = self._get_url(f"/artists/{artist_id}/albums?country=SE")
+        albums_data = self._make_all_pagination_request(
+            url_albums)
         return {"top_tracks": top_tracks_data, "albums": albums_data}
 
     def _get_album_tracks(self, track_id):
@@ -237,7 +249,7 @@ class Spotify:
                 if artist_data['albums'] is not None:
                     artist.append(ResponseRow('Albums', ''))
                     artist.extend(self._parse_albums_data(
-                        artist_data['albums']['items'], '  '))
+                        artist_data['albums'], '  '))
             return artist
         elif 'album' in uri:
             album_tracks_data = self._get_album_tracks(uri_id)
