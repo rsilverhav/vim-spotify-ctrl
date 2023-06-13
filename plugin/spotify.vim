@@ -10,6 +10,10 @@ function! spotify#open_floating(items, target_buffer)
   let options = []
   let uris = []
 
+  if len(a:items) == 0
+    return
+  endif
+
   let str_length = 0
   for item in a:items
     let split_res = split(item, "|")
