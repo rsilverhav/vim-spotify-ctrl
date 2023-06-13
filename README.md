@@ -27,6 +27,11 @@ let g:spotify_refresh_token = "<refresh token from step 7>"
 pip3 install requests
 ```
 
+### Install using Vim-plug
+```
+Plug 'rsilverhav/vim-spotify-ctrl'
+```
+After the installation, run `:UpdateRemotePlugins` and restart neovim.
 
 ## Usage
 To start the plugin call the function `SpotifyInit`. Example binding: `nnoremap <Leader>s :SpotifyInit<CR>`.
