@@ -141,9 +141,12 @@ class Spotify:
 
     def _get_album_release_datetime(self, album_data):
         date_fmt = "%Y-%m-%d"
-        pattern = re.compile("^\\d{4}$")
-        if pattern.match(album_data['release_date']):
+        pattern_year = re.compile("^\\d{4}$")
+        pattern_year_month = re.compile("^\\d{4}-\\d{2}$")
+        if pattern_year.match(album_data['release_date']):
             date_fmt = "%Y"
+        elif pattern_year_month.match(album_data['release_date']):
+            date_fmt = "%Y-%m"
         return datetime.strptime(album_data['release_date'], date_fmt)
 
     def _parse_albums_data(self, albums_data, prefix='') -> List[ResponseRow]:
