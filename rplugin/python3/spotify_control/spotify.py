@@ -8,7 +8,7 @@ from collections import namedtuple
 from typing import Any, Dict, List
 
 home = expanduser("~")
-TOKENS_FILE = home + "/.tokens.json"
+TOKENS_FILE = home + "/.spotify-tokens.json"
 BASE_URL = "https://api.spotify.com/v1"
 
 UserQueue = namedtuple("UserQueue", ["current", "queue"])
@@ -59,7 +59,7 @@ class Spotify:
         return "Basic " + encode.decode()
 
     def _get_tokens(self):
-        f = open(TOKENS_FILE, "r", encoding="utf-8")
+        f = open(TOKENS_FILE, "w+", encoding="utf-8")
         tokens = json.loads(f.read())
         f.close()
         return tokens
