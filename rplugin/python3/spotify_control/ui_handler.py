@@ -1,7 +1,7 @@
-from spotify_control.buffers.DevicesBuffer import DevicesBuffer
-from spotify_control.buffers.ResultsBuffer import ResultsBuffer
-from spotify_control.buffers.PlaylistsBuffer import PlaylistsBuffer
-from spotify_control.buffers.QueueBuffer import QueueBuffer
+from spotify_control.buffers.devices_buffer import DevicesBuffer
+from spotify_control.buffers.results_buffer import ResultsBuffer
+from spotify_control.buffers.playlists_buffer import PlaylistsBuffer
+from spotify_control.buffers.queue_buffer import QueueBuffer
 from spotify_control.buffer import Buffer
 from spotify_control.spotify import Spotify
 
