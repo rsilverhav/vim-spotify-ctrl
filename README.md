@@ -1,5 +1,6 @@
 # vim-spotify-ctrl
-![Screenshot 2023-06-13 at 14 13 37](https://github.com/rsilverhav/vim-spotify-ctrl/assets/1221817/0e48b14f-abf3-4832-90df-da9a0a791f56)
+![Screenshot 2023-06-13 at 14 19 14](https://github.com/rsilverhav/vim-spotify-ctrl/assets/1221817/3e2c0ce7-1abb-4c1a-9e5d-7dc16645e441)
+
 
 Plugin for neovim used to control the playback and browse Spotify.
 
