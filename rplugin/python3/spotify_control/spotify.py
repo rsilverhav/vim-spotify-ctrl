@@ -158,7 +158,7 @@ class Spotify:
         albums_data.sort(
             key=lambda album_data: self._get_album_release_datetime(album_data), reverse=True)
 
-        return [ResponseRow(f"{prefix}{album['name']}  by {self._get_artists_names(album['artists'])}", album['uri']) for album in albums_data]
+        return [ResponseRow(f"{prefix}{album['name']}  by {self._get_artists_names(album['artists'])}", album['uri'], artists=self._parse_artists(album['artists'])) for album in albums_data]
 
     def _parse_playlists_result_data(self, playlists_data, prefix='') -> List[ResponseRow]:
         return [ResponseRow(f"{prefix}{playlist['name']}", playlist['uri']) for playlist in playlists_data]
